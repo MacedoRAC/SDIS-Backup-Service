@@ -1,0 +1,98 @@
+package main;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
+
+public class FileManager {
+
+	private static File file;
+	private static int chunkSize;
+	private static BufferedInputStream input;
+	private static String filename;
+	
+	public FileManager(File file) {
+		this.file = file;
+		this.chunkSize = 64000;
+		String filename = (this.file).getName();
+		try {
+			this.input = new BufferedInputStream(new FileInputStream(this.file));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void splitFile(File f) throws FileNotFoundException, IOException{
+		int partCounter = 1;//I like to name parts from 001, 002, 003, ...
+		//you can change it to 0 if you want 000, 001, ...
+
+		byte[] buf = new byte[chunkSize];
+		File newFile = new File("");
+
+		int tmp = 0;
+		while ((tmp = input.read(buf)) > 0){
+			//write each chunk of data into separate file
+			newFile = new File(file.getParent(), filename + "." + String.format("%03d", partCounter++));
+			try (FileOutputStream out = new FileOutputStream(newFile)) {
+				out.write(buf, 0, tmp);//tmp is chunk final size
+			}
+		}
+		
+		if(newFile.length() == chunkSize){
+			newFile = new File(file.getParent(), filename + "." + String.format("%03d", partCounter++)); 
+			try (FileOutputStream out = new FileOutputStream(newFile)) {
+				out.write(new byte[0], 0, 0);//one last chunk with size 0 to end file
+			}
+		}
+	}
+	
+	public static void mergeFiles(List<File> chunks, File merged) throws IOException {
+	    
+		BufferedOutputStream mergingStream = new BufferedOutputStream(new FileOutputStream(merged));
+
+		for (File f : chunks) {
+			Files.copy(f.toPath(), mergingStream);
+		}
+	}
+
+	public static File getFile() {
+		return file;
+	}
+
+	public static void setFile(File file) {
+		FileManager.file = file;
+	}
+
+	public static int getChunkSize() {
+		return chunkSize;
+	}
+
+	public static void setChunkSize(int chunkSize) {
+		FileManager.chunkSize = chunkSize;
+	}
+
+	public static BufferedInputStream getInput() {
+		return input;
+	}
+
+	public static void setInput(BufferedInputStream input) {
+		FileManager.input = input;
+	}
+
+	public static String getFilename() {
+		return filename;
+	}
+
+	public static void setFilename(String filename) {
+		FileManager.filename = filename;
+	}
+	
+	
+}

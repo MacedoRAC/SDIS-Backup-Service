@@ -1,9 +1,24 @@
 package protocols;
 
-public class Backup {
+import java.io.IOException;
 
-	public Backup() {
-		// TODO Auto-generated constructor stub
+import main.Communication;
+
+public class Backup {
+	private static Communication com;
+	private boolean working;
+
+	public Backup() throws IOException {
+		this.com = new Communication("", 0);
+		this.working = true;
+	}
+
+	public void start() {
+
+		while(working){
+			
+		}
+		
 	}
 
 }

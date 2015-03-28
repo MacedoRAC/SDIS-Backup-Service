@@ -1,6 +1,7 @@
 package main;
 
 import java.io.IOException;
+import java.util.Hashtable;
 
 import protocols.Backup;
 import protocols.Delete;
@@ -10,16 +11,30 @@ import cli.CLI;
 
 public class Main {
 	private static CLI cli;
-	private static Communication communication;
 	private	static Restore restore;
 	private static Backup backup;
 	private static Delete delete;
 	private static SpaceReclaiming spaceRec;
-	private static String ip;
-	private static int port;
+	private static String CRLF = "\r\n";
+	private static int chunkSize = 64000;
+	private static Hashtable<String, Integer> database = new Hashtable<String, Integer>(); 
 
 	public static void main(String[] args) throws IOException {
-		Communication com = new Communication("224.0.0.1", 4000); //let the user choose in CLI
+		//populate database with id's and port
+		database.put("224.0.0.1", 4000);
+		database.put("224.0.0.2", 4000);
+		database.put("224.0.0.3", 4000);
+		database.put("224.0.0.4", 4000);
+		database.put("224.0.0.5", 4000);
+		database.put("224.0.0.6", 4000);
+		
+		
+		//start protocols
+		backup.start();
+		restore.start();
+		delete.start();
+		spaceRec.start();
+		
 		
 	}
 
