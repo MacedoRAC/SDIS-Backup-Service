@@ -3,6 +3,7 @@ package main;
 import java.io.IOException;
 import java.util.Hashtable;
 
+import persistence.Persistence;
 import protocols.Backup;
 import protocols.Delete;
 import protocols.Restore;
@@ -17,17 +18,12 @@ public class Main {
 	private static SpaceReclaiming spaceRec;
 	private static String CRLF = "\r\n";
 	private static int chunkSize = 64000;
-	private static Hashtable<String, Integer> database = new Hashtable<String, Integer>(); 
+	private static Persistence database;
 
 	public static void main(String[] args) throws IOException {
-		//populate database with id's and port
-		database.put("224.0.0.1", 4000);
-		database.put("224.0.0.2", 4000);
-		database.put("224.0.0.3", 4000);
-		database.put("224.0.0.4", 4000);
-		database.put("224.0.0.5", 4000);
-		database.put("224.0.0.6", 4000);
-		
+		//initialize database
+		//if a config file is loaded call another method
+		database = new Persistence();
 		
 		//start protocols
 		backup.start();

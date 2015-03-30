@@ -4,7 +4,8 @@ import java.io.IOException;
 
 import main.Communication;
 
-public class Backup {
+public class Backup extends Thread{
+
 	private static Communication com;
 	private boolean working;
 
@@ -12,13 +13,21 @@ public class Backup {
 		this.com = new Communication("", 0);
 		this.working = true;
 	}
+	
+	public static Communication getCom() {
+		return com;
+	}
 
-	public void start() {
+	public static void setCom(Communication com) {
+		Backup.com = com;
+	}
 
-		while(working){
-			
-		}
-		
+	public boolean isWorking() {
+		return working;
+	}
+
+	public void setWorking(boolean working) {
+		this.working = working;
 	}
 
 }

@@ -30,7 +30,8 @@ public class FileManager {
 	}
 	
 	public static void splitFile(File f) throws FileNotFoundException, IOException{
-		int partCounter = 1;//give names to chunks. change this to unique id
+		int partCounter = 1;//I like to name parts from 001, 002, 003, ...
+		//you can change it to 0 if you want 000, 001, ...
 
 		byte[] buf = new byte[chunkSize];
 		File newFile = new File("");

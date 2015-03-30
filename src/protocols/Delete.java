@@ -2,16 +2,11 @@ package protocols;
 
 import main.Communication;
 
-public class Delete {
+public class Delete extends Thread{
 	private static Communication com;
 
 	public Delete() {
 		// TODO Auto-generated constructor stub
-	}
-
-	public void start() {
-		// TODO Auto-generated method stub
-		
 	}
 
 }
