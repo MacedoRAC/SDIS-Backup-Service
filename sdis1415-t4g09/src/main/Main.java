@@ -1,8 +1,7 @@
 package main;
 
 import java.io.IOException;
-import java.util.Hashtable;
-
+import persistence.Persistence;
 import protocols.Backup;
 import protocols.Delete;
 import protocols.Restore;
@@ -17,17 +16,15 @@ public class Main {
 	private static SpaceReclaiming spaceRec;
 	private static String CRLF = "\r\n";
 	private static int chunkSize = 64000;
-	private static Hashtable<String, Integer> database = new Hashtable<String, Integer>(); 
+	private static Persistence database;
+	private static String version;
+	private static int diskSpace = 1000000;
 
 	public static void main(String[] args) throws IOException {
-		//populate database with id's and port
-		database.put("224.0.0.1", 4000);
-		database.put("224.0.0.2", 4000);
-		database.put("224.0.0.3", 4000);
-		database.put("224.0.0.4", 4000);
-		database.put("224.0.0.5", 4000);
-		database.put("224.0.0.6", 4000);
-		
+		//initialize database
+		//if a config file is loaded call another method
+		database = new Persistence();
+		version = "1.0";
 		
 		//start protocols
 		backup.start();
@@ -38,4 +35,83 @@ public class Main {
 		
 	}
 
+	public static CLI getCli() {
+		return cli;
+	}
+
+	public static void setCli(CLI cli) {
+		Main.cli = cli;
+	}
+
+	public static Restore getRestore() {
+		return restore;
+	}
+
+	public static void setRestore(Restore restore) {
+		Main.restore = restore;
+	}
+
+	public static Backup getBackup() {
+		return backup;
+	}
+
+	public static void setBackup(Backup backup) {
+		Main.backup = backup;
+	}
+
+	public static Delete getDelete() {
+		return delete;
+	}
+
+	public static void setDelete(Delete delete) {
+		Main.delete = delete;
+	}
+
+	public static SpaceReclaiming getSpaceRec() {
+		return spaceRec;
+	}
+
+	public static void setSpaceRec(SpaceReclaiming spaceRec) {
+		Main.spaceRec = spaceRec;
+	}
+
+	public static String getCRLF() {
+		return CRLF;
+	}
+
+	public static void setCRLF(String cRLF) {
+		CRLF = cRLF;
+	}
+
+	public static int getChunkSize() {
+		return chunkSize;
+	}
+
+	public static void setChunkSize(int chunkSize) {
+		Main.chunkSize = chunkSize;
+	}
+
+	public static Persistence getDatabase() {
+		return database;
+	}
+
+	public static void setDatabase(Persistence database) {
+		Main.database = database;
+	}
+
+	public static String getVersion() {
+		return version;
+	}
+
+	public static void setVersion(String version) {
+		Main.version = version;
+	}
+
+	public static int getDiskSpace() {
+		return diskSpace;
+	}
+
+	public static void setDiskSpace(int diskSpace) {
+		Main.diskSpace = diskSpace;
+	}
 }

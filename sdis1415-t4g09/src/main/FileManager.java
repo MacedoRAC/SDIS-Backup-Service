@@ -7,7 +7,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public class FileManager {
@@ -16,22 +19,53 @@ public class FileManager {
 	private static int chunkSize;
 	private static BufferedInputStream input;
 	private static String filename;
+	private static StringBuffer hashFilename;
 	
-	public FileManager(File file) {
-		this.file = file;
-		this.chunkSize = 64000;
-		String filename = (this.file).getName();
+	public FileManager(String file2) {
+		FileManager.filename = file2;
+		FileManager.chunkSize = 64000;
+		FileManager.file = new File(filename);
 		try {
-			this.input = new BufferedInputStream(new FileInputStream(this.file));
+			FileManager.input = new BufferedInputStream(new FileInputStream(FileManager.file));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		
+		hashName();
 	}
 	
+	private void hashName() {
+		hashFilename = new StringBuffer(filename);
+		
+		MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        
+        String metadata = filename + file.lastModified();
+        byte[] hash = null;
+        
+        try {
+            assert digest != null;
+            hash = digest.digest(metadata.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+
+	    //convert byte[] to hex
+        for (byte a : hash) {
+            hashFilename.append(Integer.toString((a & 0xff) + 0x100, 16).substring(1));
+        }
+		
+	}
+
 	public static void splitFile(File f) throws FileNotFoundException, IOException{
-		int partCounter = 1;//I like to name parts from 001, 002, 003, ...
-		//you can change it to 0 if you want 000, 001, ...
+		int partCounter = 1;//give names to chunks. change this to unique id
 
 		byte[] buf = new byte[chunkSize];
 		File newFile = new File("");
@@ -92,6 +126,14 @@ public class FileManager {
 
 	public static void setFilename(String filename) {
 		FileManager.filename = filename;
+	}
+
+	public static StringBuffer getHashFilename() {
+		return hashFilename;
+	}
+
+	public static void setHashFilename(StringBuffer hashFilename) {
+		FileManager.hashFilename = hashFilename;
 	}
 	
 	

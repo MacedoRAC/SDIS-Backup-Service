@@ -7,10 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public class FileManager {
@@ -19,51 +16,19 @@ public class FileManager {
 	private static int chunkSize;
 	private static BufferedInputStream input;
 	private static String filename;
-	private static StringBuffer hashFilename;
 	
-	public FileManager(String file2) {
-		FileManager.filename = file2;
-		FileManager.chunkSize = 64000;
-		FileManager.file = new File(filename);
+	public FileManager(File file) {
+		this.file = file;
+		this.chunkSize = 64000;
+		String filename = (this.file).getName();
 		try {
-			FileManager.input = new BufferedInputStream(new FileInputStream(FileManager.file));
+			this.input = new BufferedInputStream(new FileInputStream(this.file));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		hashName();
 	}
 	
-	private void hashName() {
-		hashFilename = new StringBuffer(filename);
-		
-		MessageDigest digest = null;
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        
-        String metadata = filename + file.lastModified();
-        byte[] hash = null;
-        
-        try {
-            assert digest != null;
-            hash = digest.digest(metadata.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-
-	    //convert byte[] to hex
-        for (byte a : hash) {
-            hashFilename.append(Integer.toString((a & 0xff) + 0x100, 16).substring(1));
-        }
-		
-	}
-
 	public static void splitFile(File f) throws FileNotFoundException, IOException{
 		int partCounter = 1;//give names to chunks. change this to unique id
 
@@ -126,14 +91,6 @@ public class FileManager {
 
 	public static void setFilename(String filename) {
 		FileManager.filename = filename;
-	}
-
-	public static StringBuffer getHashFilename() {
-		return hashFilename;
-	}
-
-	public static void setHashFilename(StringBuffer hashFilename) {
-		FileManager.hashFilename = hashFilename;
 	}
 	
 	

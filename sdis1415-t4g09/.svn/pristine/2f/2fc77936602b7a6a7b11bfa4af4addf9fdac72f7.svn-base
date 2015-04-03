@@ -3,8 +3,6 @@ package persistence;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import main.Main;
-
 public class Persistence {
 	
 	private Hashtable<String, String> persistence; //Hashtable<id, filename>
@@ -17,10 +15,6 @@ public class Persistence {
 	public Persistence(Hashtable<String, String> persistence, Vector<Chunk> chunks) {
 		this.persistence = persistence;
 		this.chunks = chunks;
-	}
-	
-	public int freeSpace(){
-		return Main.getDiskSpace() - chunks.size() * Main.getChunkSize();
 	}
 	
 	public void addFile(String fID, String name){
