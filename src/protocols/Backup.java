@@ -1,6 +1,8 @@
 package protocols;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Random;
 
 import persistence.Chunk;
 import main.Communication;
@@ -75,8 +77,25 @@ public class Backup extends Thread{
 		//if not exists create a new chunk and send STORED message
 		if(!chunkExists){
 			Chunk newChunk;
-			
+			FileManager fileMan = new FileManager(header[2], Integer.parseInt(header[4]));
+            fileMan.writeToFile(Integer.parseInt(header[3]), body);
+            newChunk = new Chunk(header[2], Integer.parseInt(header[3]), Integer.parseInt(header[4]));
+            Main.getDatabase().getChunks().add(newChunk);
 		}
+		
+		
+		//send stored message
+		String sendMsg = "STORED " + Main.getVersion() + " " + header.get(2) + " " + header.get(3) + Main.getCRLF().toString() + Main.getCRLF().toString();
+
+        Random r = new Random();
+        int time = r.nextInt(401);
+        try {
+            sleep(time);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        com.send(sendMsg.getBytes(StandardCharsets.ISO_8859_1));
 		
 	}
 

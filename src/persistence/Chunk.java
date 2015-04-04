@@ -9,13 +9,11 @@ public class Chunk {
 	private int chunkNo;
 	
 	
-	public Chunk(int rD, String fID, int n, String ip) {
+	public Chunk(String fID, int n, int rD) {
 		this.replDegree = rD;
 		this.fileID = fID;
 		this.number = n;
-		this.ip = ip;
 	}
-
 
 	public String getIp() {
 		return ip;
