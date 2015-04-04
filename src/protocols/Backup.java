@@ -85,7 +85,7 @@ public class Backup extends Thread{
 		
 		
 		//send stored message
-		String sendMsg = "STORED " + Main.getVersion() + " " + header.get(2) + " " + header.get(3) + Main.getCRLF().toString() + Main.getCRLF().toString();
+		String sendMsg = "STORED " + Main.getVersion() + " " + header[2] + " " + header[3] + Main.getCRLF().toString() + Main.getCRLF().toString();
 
         Random r = new Random();
         int time = r.nextInt(401);
@@ -152,7 +152,7 @@ public class Backup extends Thread{
 		
 		public BackupSend(String file, int chunkN, int repD){
 			
-			this.fileMan = new FileManager(file);
+			this.fileMan = new FileManager(file, repD);
 			
 			this.time = 400;
 			this.tries = 0;

@@ -1,6 +1,8 @@
 package protocols;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Random;
 
 import persistence.Chunk;
 import main.Communication;
@@ -12,6 +14,7 @@ public class Restore extends Thread {
 	private static boolean working;
 	private String[] header;
 	private byte[] msg;
+	private byte[] body;
 
 	public Restore() throws IOException {
 		this.com = new Communication("", 0);
@@ -19,9 +22,7 @@ public class Restore extends Thread {
 	}
 	
 	
-	public void start(){
-		byte[] msg;
-		
+	public void start(){		
 		while(working){
 			msg = com.receive();
 			
@@ -53,14 +54,73 @@ public class Restore extends Thread {
 		}
 		
 		if(!ChunkExists){
-			FileManager fileMan =  new FileManager(header[2]);
-			fileMan.writeToFile(Integer.parseInt(header[3]), msg);
-			Chunk chunk = new Chunk(replDegree, header[2], Integer.parseInt(header[3]), "sad" /*VER O IP*/ );
+			decrypte(msg);
+			FileManager fileMan =  new FileManager(header[2], replDegree);
+			fileMan.writeToFile(Integer.parseInt(header[3]), body);
+			Chunk chunk = new Chunk(header[2], Integer.parseInt(header[3]), replDegree);
 			Main.getDatabase().getChunks().add(chunk);
-			//Main.getRestore().
+			Main.getRestore().setWaitingConfirm(body.length);
 		}
 	}
 	
 	
+	
+	private void setWaitingConfirm(int length) {
+		 int currentChunk = 0;
+		FileManager fMan;
+		boolean waitingconf = false;
+		
+		
+		String sendMsg = "GETCHUNK " + Main.getVersion() + " " + header[2] + " " + header[3] + Main.getCRLF().toString() + Main.getCRLF().toString();
+
+        Random r = new Random();
+        int time = r.nextInt(401);
+        try {
+            sleep(time);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        com.send(sendMsg.getBytes(StandardCharsets.ISO_8859_1));
+        /*
+		while(true){
+			String send_msg = "GETCHUNK " + Main.getVersion() + " " + header[2] +
+                    " " + currentChunk + Main.getCRLF() + Main.getCRLF();
+             
+			//   System.out.println("Waiting for chunk No " + currentChunk); 
+			
+			while(!waitingconf){
+				Thread.sleep(300);
+			}
+			
+		}
+		
+		fMan = new FileManager(fileID, 0);
+		fMan.merge();
+		*/
+		System.out.println("Chunck restore completed");
+	}
+
+
+	private void decrypte(byte[] msg) {
+		//separate header information considering one or more spaces betweeen words
+		String dec = msg.toString();
+		String[] tmp = dec.split("\\s+");
+		header = new String[tmp.length];
+	
+		int headerLength = 0;
+		for(int i=0; i<tmp.length; i++){//remove any whitespace before and after each string
+			header[i] = tmp[i].trim();
+			headerLength += tmp[i].length();
+		}
+		
+		//separate body
+		body = new byte[dec.length() - headerLength + 4]; // +4 because of the two CRLF in the end of the header
+		
+		int bodyIndex = 0;
+		for(int i = headerLength + 4; i<dec.length(); i++){
+			body[bodyIndex] = msg[i];
+		}	
+	}
 	
 }
