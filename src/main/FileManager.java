@@ -20,17 +20,19 @@ public class FileManager {
 	private static BufferedInputStream input;
 	private static String filename;
 	private static StringBuffer hashFilename;
+	private static int repDegree;
 	
-	public FileManager(String file2) {
+	public FileManager(String file2, int repDeg) {
 		FileManager.filename = file2;
 		FileManager.chunkSize = 64000;
-		FileManager.file = new File(filename);
+		/*FileManager.file = new File(filename);
 		try {
 			FileManager.input = new BufferedInputStream(new FileInputStream(FileManager.file));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
+		FileManager.repDegree = repDeg;
 		
 		
 		hashName();
@@ -94,6 +96,15 @@ public class FileManager {
 		for (File f : chunks) {
 			Files.copy(f.toPath(), mergingStream);
 		}
+	}
+
+	
+	public static int getRepDegree() {
+		return repDegree;
+	}
+
+	public static void setRepDegree(int repDegree) {
+		FileManager.repDegree = repDegree;
 	}
 
 	public static File getFile() {
