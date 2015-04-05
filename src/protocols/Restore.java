@@ -73,31 +73,30 @@ public class Restore extends Thread {
 		
 		String sendMsg = "GETCHUNK " + Main.getVersion() + " " + header[2] + " " + header[3] + Main.getCRLF().toString() + Main.getCRLF().toString();
 
-        Random r = new Random();
-        int time = r.nextInt(401);
-        try {
-            sleep(time);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        
 
         com.send(sendMsg.getBytes(StandardCharsets.ISO_8859_1));
-        /*
+
 		while(true){
+			currentChunk++;
 			String send_msg = "GETCHUNK " + Main.getVersion() + " " + header[2] +
                     " " + currentChunk + Main.getCRLF() + Main.getCRLF();
              
-			//   System.out.println("Waiting for chunk No " + currentChunk); 
+			System.out.println("Waiting for chunk No " + currentChunk); 
 			
-			while(!waitingconf){
-				Thread.sleep(300);
-			}
+			Random r = new Random();
+	        int time = r.nextInt(401);
+	        try {
+	            sleep(time);
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
 			
 		}
 		
-		fMan = new FileManager(fileID, 0);
+		fMan = new FileManager(header[2], 0);
 		fMan.merge();
-		*/
+		
 		System.out.println("Chunck restore completed");
 	}
 
