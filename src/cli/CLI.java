@@ -1,10 +1,46 @@
 package cli;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Map.Entry;
+
+import protocols.Backup;
+import protocols.Backup.BackupSend;
+import protocols.Restore;
+import main.Main;
 
 public class CLI {
 
 	public CLI() throws IOException {
+		configMenu();
+	}
+
+	private void configMenu() throws IOException {
+
+		clearConsole();
+		
+		serviceTitle();
+		
+		//backup config
+		System.out.println("\nConfigure for each protocol an IP and a control Port:\n"
+				+ "Backup IP: ");
+		String backupIP = System.console().readLine();
+		System.out.println("Backup Port: ");
+		int backupPort = Integer.parseInt(System.console().readLine());
+		
+		Main.setBackup(new Backup(backupIP, backupPort));
+		Main.getBackup().start();
+		
+		//restore config
+		System.out.println("Restore IP: ");
+		String restoreIP = System.console().readLine();
+		System.out.println("Restore Port: ");
+		int restorePort = Integer.parseInt(System.console().readLine());
+		
+		Main.setRestore(new Restore(restoreIP, restorePort));
+		Main.getRestore().start();
+		
+		//open main menu
 		menu();
 	}
 
@@ -39,6 +75,10 @@ public class CLI {
 			spaceRecMenu();
 			break;
 		case 5:
+			Main.getBackup().setWorking(false);
+            Main.getRestore().setWorking(false);
+            Main.getBackup().getCom().getSocket().close();
+            Main.getRestore().getCom().getSocket().close();
 			return;
 		}
 	}
@@ -89,14 +129,28 @@ public class CLI {
 		System.out.println("***    Restore ***");
 		System.out.println("*******************");
 		
-		System.out.println("\n\nWrite the filename! To go back write 'back'!");
+		System.out.println("\n\nWrite the file you want to restore by choosing the number in the left of each entry! To go back write 'back'!");
 		
-		String path = System.console().readLine();
+		String file = System.console().readLine();
 		
-		if(path == "back") //go back to main menu
+		if(file == "back") //go back to main menu
 			menu();
 		else{
-			// call restore method to file selected
+			int i=1;
+			String fileID = null;
+			for(Entry<String, String> entry: Main.getDatabase().getPersistence().entrySet()){
+				if(i == Integer.parseInt(file))
+					fileID = entry.getKey();
+				
+				i++;
+			}
+			
+			if(fileID == null){
+				System.err.println("File not found in database. Please insert an existing ID.");
+			}else{
+				System.out.println("Restore initialized...");
+				//inicializar aqui o processo de restore...ver o backup
+			}
 		}
 		
 	}
@@ -115,7 +169,19 @@ public class CLI {
 		if(path == "back") //go back to main menu
 			menu();
 		else{
-			// call backup method to file selected
+			if(new File(path).exists()){
+				System.out.println("Replication degree: ");
+				String repDeg = System.console().readLine();
+				
+				if(Integer.parseInt(repDeg) >= 1){
+					BackupSend s = new BackupSend(path, 0, Integer.parseInt(repDeg));
+					Main.getBackup().getSendingArray().addElement(s);
+					System.out.println("Backup initialized...");
+					Main.getService().submit(s);
+				}
+			}else{
+				System.err.println("File not found. Please verify the file path");
+			}
 		}
 	}
 

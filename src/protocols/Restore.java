@@ -17,9 +17,9 @@ public class Restore extends Thread {
 	private byte[] msg;
 	private byte[] body;
 
-	public Restore() throws IOException {
-		this.com = new Communication("", 0);
-		this.working = true;
+	public Restore(String ip, int port) throws IOException {
+		Restore.com = new Communication(ip, port);
+		Restore.working = true;
 	}
 	
 	
@@ -32,6 +32,56 @@ public class Restore extends Thread {
 		}
 	}
 	
+	public static Communication getCom() {
+		return com;
+	}
+
+
+	public static void setCom(Communication com) {
+		Restore.com = com;
+	}
+
+
+	public static boolean isWorking() {
+		return working;
+	}
+
+
+	public static void setWorking(boolean working) {
+		Restore.working = working;
+	}
+
+
+	public String[] getHeader() {
+		return header;
+	}
+
+
+	public void setHeader(String[] header) {
+		this.header = header;
+	}
+
+
+	public byte[] getMsg() {
+		return msg;
+	}
+
+
+	public void setMsg(byte[] msg) {
+		this.msg = msg;
+	}
+
+
+	public byte[] getBody() {
+		return body;
+	}
+
+
+	public void setBody(byte[] body) {
+		this.body = body;
+	}
+
+
 	public void receiving(byte[] msg){
 		if(header[0] == "GETCHUNK"){
 			if(header[1] == Main.getVersion())

@@ -3,6 +3,7 @@ package protocols;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
+import java.util.Vector;
 
 import persistence.Chunk;
 import main.Communication;
@@ -15,13 +16,41 @@ public class Backup extends Thread{
 	private boolean working;
 	private String[] header;
 	private byte[] body;
-	private BackupSend[] sendingArray;
+	private Vector<BackupSend> sendingArray;
+
+	public String[] getHeader() {
+		return header;
+	}
+
+	public void setHeader(String[] header) {
+		this.header = header;
+	}
+
+	public byte[] getBody() {
+		return body;
+	}
+
+	public void setBody(byte[] body) {
+		this.body = body;
+	}
+
+	public Vector<BackupSend> getSendingArray() {
+		return sendingArray;
+	}
+
+	public void setSendingArray(Vector<BackupSend> sendingArray) {
+		this.sendingArray = sendingArray;
+	}
 
 	public Backup(String ip, int port) throws IOException {
 		Backup.com = new Communication(ip, port);
 		this.working = true;
 	}
 	
+	public Backup() {
+		// TODO Auto-generated constructor stub
+	}
+
 	@Override
 	public void start(){
 		byte[] msg;
@@ -49,9 +78,9 @@ public class Backup extends Thread{
 
 	private void backupProcess() {
 
-		for(int i = 0; i < sendingArray.length; i++){
-			if(sendingArray[i].getHash() == header[2] && sendingArray[i].getChunkNo() == Integer.parseInt(header[3])){
-				sendingArray[i].setToSend(true);
+		for(int i = 0; i < sendingArray.size(); i++){
+			if(sendingArray.get(i).getHash() == header[2] && sendingArray.get(i).getChunkNo() == Integer.parseInt(header[3])){
+				sendingArray.get(i).setToSend(true);
 				break;
 			}
 		}
@@ -137,7 +166,7 @@ public class Backup extends Thread{
 	}
 	
 	
-	public class BackupSend extends Thread{
+	public static class BackupSend extends Thread{
 		
 		private FileManager fileMan;
 		private int repDegree;
