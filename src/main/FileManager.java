@@ -140,7 +140,7 @@ public class FileManager {
 		FileManager.file = file;
 	}
 
-	public static int getChunkSize() {
+	public int getChunkSize() {
 		return chunkSize;
 	}
 

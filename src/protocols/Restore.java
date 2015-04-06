@@ -2,6 +2,7 @@ package protocols;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Random;
 
 import persistence.Chunk;
@@ -66,23 +67,21 @@ public class Restore extends Thread {
 	
 	
 	private void setWaitingConfirm(int length) {
-		 int currentChunk = 0;
+		int currentChunk = 0;
 		FileManager fMan;
 		boolean waitingconf = false;
-		
-		
-		String sendMsg = "GETCHUNK " + Main.getVersion() + " " + header[2] + " " + header[3] + Main.getCRLF().toString() + Main.getCRLF().toString();
+		String sendMsg = "";
+		List<Chunk> ChunkList;
 
         
-
-        com.send(sendMsg.getBytes(StandardCharsets.ISO_8859_1));
-
 		while(true){
 			currentChunk++;
-			String send_msg = "GETCHUNK " + Main.getVersion() + " " + header[2] +
-                    " " + currentChunk + Main.getCRLF() + Main.getCRLF();
-             
-			System.out.println("Waiting for chunk No " + currentChunk); 
+			
+			sendMsg = "GETCHUNK " + Main.getVersion() + " " + header[2] + " " + header[3] + Main.getCRLF().toString() + Main.getCRLF().toString();
+
+	        
+
+	        com.send(sendMsg.getBytes(StandardCharsets.ISO_8859_1));
 			
 			Random r = new Random();
 	        int time = r.nextInt(401);
@@ -91,11 +90,16 @@ public class Restore extends Thread {
 	        } catch (InterruptedException e) {
 	            e.printStackTrace();
 	        }
+	        
+	        fMan = new FileManager(header[2], 0);
+	        if(fMan.getChunkSize() < 64000){
+                break;
+            }
 			
 		}
 		
 		fMan = new FileManager(header[2], 0);
-		fMan.merge();
+		/*fMan.mergeFiles(ChunkList, );*/
 		
 		System.out.println("Chunck restore completed");
 	}
