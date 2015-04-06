@@ -1,8 +1,12 @@
 package main;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import persistence.Persistence;
 import protocols.Backup;
+import protocols.Control;
 import protocols.Delete;
 import protocols.Restore;
 import protocols.SpaceReclaiming;
@@ -13,26 +17,42 @@ public class Main {
 	private	static Restore restore;
 	private static Backup backup;
 	private static Delete delete;
+	private static Control control;
+	public static Control getControl() {
+		return control;
+	}
+
+	public static void setControl(Control control) {
+		Main.control = control;
+	}
+
 	private static SpaceReclaiming spaceRec;
 	private static String CRLF = "\r\n";
 	private static int chunkSize = 64000;
 	private static Persistence database;
 	private static String version;
 	private static int diskSpace = 1000000;
+    public static ExecutorService getService() {
+		return service;
+	}
+
+	public static void setService(ExecutorService service) {
+		Main.service = service;
+	}
+
+	private static ExecutorService service;
 
 	public static void main(String[] args) throws IOException {
 		//initialize database
 		//if a config file is loaded call another method
 		database = new Persistence();
+		
+		service = Executors.newFixedThreadPool(15);
+		
 		version = "1.0";
 		
-		//start protocols
-		backup.start();
-		restore.start();
-		delete.start();
-		spaceRec.start();
-		
-		
+		//start 
+		cli = new CLI();
 	}
 
 	public static CLI getCli() {

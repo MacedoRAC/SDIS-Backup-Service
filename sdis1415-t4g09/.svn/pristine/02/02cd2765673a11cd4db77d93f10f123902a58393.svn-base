@@ -46,8 +46,6 @@ public class Backup extends Thread{
 		Backup.com = new Communication(ip, port);
 		this.working = true;
 		this.sendingArray = new Vector<BackupSend>();
-		body = new byte[64000];
-		header = new String[2500];
 	}
 	
 	public Backup() {

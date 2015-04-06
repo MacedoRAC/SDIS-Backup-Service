@@ -45,9 +45,6 @@ public class Backup extends Thread{
 	public Backup(String ip, int port) throws IOException {
 		Backup.com = new Communication(ip, port);
 		this.working = true;
-		this.sendingArray = new Vector<BackupSend>();
-		body = new byte[64000];
-		header = new String[2500];
 	}
 	
 	public Backup() {
@@ -55,7 +52,7 @@ public class Backup extends Thread{
 	}
 
 	@Override
-	public void run(){
+	public void start(){
 		byte[] msg;
 		
 		while(working){
@@ -182,7 +179,6 @@ public class Backup extends Thread{
 		private boolean toSend;
 		
 		
-		@SuppressWarnings("static-access")
 		public BackupSend(String file, int chunkN, int repD){
 			
 			this.fileMan = new FileManager(file, repD);
@@ -197,9 +193,8 @@ public class Backup extends Thread{
 			this.hash = fileMan.getHashFilename().toString();
 		}
 		
-		@SuppressWarnings("static-access")
 		@Override
-		public void run(){
+		public void start(){
 			
 			if(!file){
 				try {
@@ -254,20 +249,13 @@ public class Backup extends Thread{
 			}
 		}
 		
-		@SuppressWarnings("static-access")
 		private void chunkBackup(int chunkNo) throws IOException {
-			System.out.println("Collecting chunk data...");
 			fileMan.collectChunkData(chunkNo);
-			System.out.println("Chunk data collected sucessfully!");
 			
 			 String msg = "PUTCHUNK " + Main.getVersion() + " " + hash + " " + chunkNo + " " + fileMan.getRepDegree() + Main.getCRLF() + Main.getCRLF();
-			 System.out.println("Message to send:\n" + msg);
-			 
 			 byte[] tmp = msg.getBytes(StandardCharsets.ISO_8859_1);
-			
-			 int msgSize = tmp.length + fileMan.getChunkData().length;
-			 System.out.println(msgSize);
-			 byte[] finalMsg = new byte[msgSize];
+			 
+			 byte[] finalMsg = new byte[tmp.length + fileMan.getChunkData().length];
 			 System.arraycopy(tmp, 0, finalMsg, 0, tmp.length);
 			 System.arraycopy(fileMan.getChunkData(), 0, finalMsg, tmp.length, fileMan.getChunkData().length);
 

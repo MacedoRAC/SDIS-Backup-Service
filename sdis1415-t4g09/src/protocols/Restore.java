@@ -1,5 +1,6 @@
 package protocols;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -17,13 +18,13 @@ public class Restore extends Thread {
 	private byte[] msg;
 	private byte[] body;
 
-	public Restore() throws IOException {
-		this.com = new Communication("", 0);
-		this.working = true;
+	public Restore(String ip, int port) throws IOException {
+		Restore.com = new Communication(ip, port);
+		Restore.working = true;
 	}
 	
 	
-	public void start(){		
+	public void run(){		
 		while(working){
 			msg = com.receive();
 			
@@ -32,6 +33,56 @@ public class Restore extends Thread {
 		}
 	}
 	
+	public static Communication getCom() {
+		return com;
+	}
+
+
+	public static void setCom(Communication com) {
+		Restore.com = com;
+	}
+
+
+	public static boolean isWorking() {
+		return working;
+	}
+
+
+	public static void setWorking(boolean working) {
+		Restore.working = working;
+	}
+
+
+	public String[] getHeader() {
+		return header;
+	}
+
+
+	public void setHeader(String[] header) {
+		this.header = header;
+	}
+
+
+	public byte[] getMsg() {
+		return msg;
+	}
+
+
+	public void setMsg(byte[] msg) {
+		this.msg = msg;
+	}
+
+
+	public byte[] getBody() {
+		return body;
+	}
+
+
+	public void setBody(byte[] body) {
+		this.body = body;
+	}
+
+
 	public void receiving(byte[] msg){
 		if(header[0] == "GETCHUNK"){
 			if(header[1] == Main.getVersion())
@@ -67,16 +118,10 @@ public class Restore extends Thread {
 	
 	
 	private void setWaitingConfirm(int length) {
-		int currentChunk = 0;
 		FileManager fMan;
-		boolean waitingconf = false;
+		List<File> ChunkList = null;
 		String sendMsg = "";
-		List<Chunk> ChunkList;
-
-        
 		while(true){
-			currentChunk++;
-			
 			sendMsg = "GETCHUNK " + Main.getVersion() + " " + header[2] + " " + header[3] + Main.getCRLF().toString() + Main.getCRLF().toString();
 
 	        
@@ -95,11 +140,19 @@ public class Restore extends Thread {
 	        if(fMan.getChunkSize() < 64000){
                 break;
             }
+	        
+	        
 			
 		}
 		
 		fMan = new FileManager(header[2], 0);
-		/*fMan.mergeFiles(ChunkList, );*/
+		
+		try {
+			fMan.mergeFiles(ChunkList, new File(header[2].toString()));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		System.out.println("Chunck restore completed");
 	}

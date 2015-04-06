@@ -3,6 +3,7 @@ package protocols;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
+import java.util.Vector;
 
 import persistence.Chunk;
 import main.Communication;
@@ -15,15 +16,46 @@ public class Backup extends Thread{
 	private boolean working;
 	private String[] header;
 	private byte[] body;
-	private BackupSend[] sendingArray;
+	private Vector<BackupSend> sendingArray;
+
+	public String[] getHeader() {
+		return header;
+	}
+
+	public void setHeader(String[] header) {
+		this.header = header;
+	}
+
+	public byte[] getBody() {
+		return body;
+	}
+
+	public void setBody(byte[] body) {
+		this.body = body;
+	}
+
+	public Vector<BackupSend> getSendingArray() {
+		return sendingArray;
+	}
+
+	public void setSendingArray(Vector<BackupSend> sendingArray) {
+		this.sendingArray = sendingArray;
+	}
 
 	public Backup(String ip, int port) throws IOException {
 		Backup.com = new Communication(ip, port);
 		this.working = true;
+		this.sendingArray = new Vector<BackupSend>();
+		body = new byte[64000];
+		header = new String[2500];
 	}
 	
+	public Backup() {
+		// TODO Auto-generated constructor stub
+	}
+
 	@Override
-	public void start(){
+	public void run(){
 		byte[] msg;
 		
 		while(working){
@@ -49,9 +81,9 @@ public class Backup extends Thread{
 
 	private void backupProcess() {
 
-		for(int i = 0; i < sendingArray.length; i++){
-			if(sendingArray[i].getHash() == header[2] && sendingArray[i].getChunkNo() == Integer.parseInt(header[3])){
-				sendingArray[i].setToSend(true);
+		for(int i = 0; i < sendingArray.size(); i++){
+			if(sendingArray.get(i).getHash() == header[2] && sendingArray.get(i).getChunkNo() == Integer.parseInt(header[3])){
+				sendingArray.get(i).setToSend(true);
 				break;
 			}
 		}
@@ -137,7 +169,7 @@ public class Backup extends Thread{
 	}
 	
 	
-	public class BackupSend extends Thread{
+	public static class BackupSend extends Thread{
 		
 		private FileManager fileMan;
 		private int repDegree;
@@ -150,6 +182,7 @@ public class Backup extends Thread{
 		private boolean toSend;
 		
 		
+		@SuppressWarnings("static-access")
 		public BackupSend(String file, int chunkN, int repD){
 			
 			this.fileMan = new FileManager(file, repD);
@@ -164,8 +197,9 @@ public class Backup extends Thread{
 			this.hash = fileMan.getHashFilename().toString();
 		}
 		
+		@SuppressWarnings("static-access")
 		@Override
-		public void start(){
+		public void run(){
 			
 			if(!file){
 				try {
@@ -220,13 +254,20 @@ public class Backup extends Thread{
 			}
 		}
 		
+		@SuppressWarnings("static-access")
 		private void chunkBackup(int chunkNo) throws IOException {
+			System.out.println("Collecting chunk data...");
 			fileMan.collectChunkData(chunkNo);
+			System.out.println("Chunk data collected sucessfully!");
 			
 			 String msg = "PUTCHUNK " + Main.getVersion() + " " + hash + " " + chunkNo + " " + fileMan.getRepDegree() + Main.getCRLF() + Main.getCRLF();
-			 byte[] tmp = msg.getBytes(StandardCharsets.ISO_8859_1);
+			 System.out.println("Message to send:\n" + msg);
 			 
-			 byte[] finalMsg = new byte[tmp.length + fileMan.getChunkData().length];
+			 byte[] tmp = msg.getBytes(StandardCharsets.ISO_8859_1);
+			
+			 int msgSize = tmp.length + fileMan.getChunkData().length;
+			 System.out.println(msgSize);
+			 byte[] finalMsg = new byte[msgSize];
 			 System.arraycopy(tmp, 0, finalMsg, 0, tmp.length);
 			 System.arraycopy(fileMan.getChunkData(), 0, finalMsg, tmp.length, fileMan.getChunkData().length);
 

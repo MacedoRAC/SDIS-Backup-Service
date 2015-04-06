@@ -26,6 +26,7 @@ public class FileManager {
 	public FileManager(String file2, int repDeg) {
 		FileManager.filename = file2;
 		FileManager.chunkSize = 64000;
+		FileManager.file = new File(filename);
 		/*
 		 * FileManager.file = new File(filename); try { FileManager.input = new
 		 * BufferedInputStream(new FileInputStream(FileManager.file)); } catch
@@ -34,21 +35,21 @@ public class FileManager {
 		 */
 		FileManager.repDegree = repDeg;
 
-		hashName();
-	}
-
-	private void hashName() {
-		hashFilename = new StringBuffer(filename);
-
-		MessageDigest digest = null;
 		try {
-			digest = MessageDigest.getInstance("SHA-256");
+			hashName();
 		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
 
+	private void hashName() throws NoSuchAlgorithmException {
+		hashFilename = new StringBuffer("");
+
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		
 		String metadata = filename + file.lastModified();
-		byte[] hash = null;
+		byte[] hash = new byte[64];
 
 		try {
 			assert digest != null;
@@ -57,7 +58,7 @@ public class FileManager {
 			e.printStackTrace();
 		}
 
-		// convert byte[] to hex
+		// convert byte[] to hex - stackoverflow
 		for (byte a : hash) {
 			hashFilename.append(Integer.toString((a & 0xff) + 0x100, 16).substring(1));
 		}
