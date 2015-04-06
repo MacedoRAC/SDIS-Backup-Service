@@ -152,7 +152,7 @@ public class Backup extends Thread{
 		
 		public BackupSend(String file, int chunkN, int repD){
 			
-			this.fileMan = new FileManager(file);
+			this.fileMan = new FileManager(file, repD);
 			
 			this.time = 400;
 			this.tries = 0;
@@ -164,6 +164,104 @@ public class Backup extends Thread{
 			this.hash = fileMan.getHashFilename().toString();
 		}
 		
+		@Override
+		public void start(){
+			
+			if(!file){
+				try {
+					chunkBackup(chunkNo);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}else{
+				int fileParts = 0;
+				
+				try {
+					while(fileMan.collectChunkData(fileParts)){
+						String msg = "" + "PUTCHUNK " + Main.getVersion() + " " + hash + " " + fileParts + " " + fileMan.getRepDegree() + Main.getCRLF() + Main.getCRLF();
+						byte[] tmp = msg.getBytes(StandardCharsets.ISO_8859_1);
+						
+						byte[] finalMsg = new byte[tmp.length + fileMan.getChunkData().length];
+						System.arraycopy(tmp, 0, finalMsg, 0, tmp.length);
+						System.arraycopy(fileMan.getChunkData(), 0, finalMsg, tmp.length, fileMan.getChunkData().length);
+						
+						//try to send msg
+						do{
+							stored = 0;
+							Main.getBackup().getCom().send(finalMsg);
+							
+							try {
+								sleep(time);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+							tries++;
+							time *= 2;
+							
+						}while(tries < 5 && fileMan.getRepDegree() > stored);
+						
+						//delete chunk from initiator peer and from database
+						fileMan.delete(fileParts);
+						Main.getDatabase().deleteFile(hash.toString());
+						
+						//reset initial values
+						fileParts++;
+					    stored = 0;
+					    time = 500;
+					    tries = 0;
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		private void chunkBackup(int chunkNo) throws IOException {
+			fileMan.collectChunkData(chunkNo);
+			
+			 String msg = "PUTCHUNK " + Main.getVersion() + " " + hash + " " + chunkNo + " " + fileMan.getRepDegree() + Main.getCRLF() + Main.getCRLF();
+			 byte[] tmp = msg.getBytes(StandardCharsets.ISO_8859_1);
+			 
+			 byte[] finalMsg = new byte[tmp.length + fileMan.getChunkData().length];
+			 System.arraycopy(tmp, 0, finalMsg, 0, tmp.length);
+			 System.arraycopy(fileMan.getChunkData(), 0, finalMsg, tmp.length, fileMan.getChunkData().length);
+
+			 Random r = new Random();
+			 time = r.nextInt(401);
+
+			 try {
+				 sleep(time);
+			 } catch (InterruptedException e) {
+				 e.printStackTrace();
+			 }
+
+			 if (!toSend) {
+				 do{
+
+					 stored = 0;
+					 Main.getBackup().getCom().send(finalMsg);
+					 
+					 try {
+						sleep(time);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					 
+					 tries++;
+					 time *= 2;
+				 }while (tries < 5 && fileMan.getRepDegree() > stored);
+			 }
+
+			 if(fileMan.getRepDegree() > stored){
+				 System.out.println("Backup time runned out for chunk number " + chunkNo + ". Replication Degree accomplished: " + fileMan.getRepDegree());
+			 }
+		}
+
 		public FileManager getFileMan() {
 			return fileMan;
 		}
